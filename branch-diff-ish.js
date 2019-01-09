@@ -9,10 +9,10 @@ const split2         = require('split2')
 const listStream     = require('list-stream')
 const pkgtoId        = require('pkg-to-id')
 const map            = require('map-async')
-const commitToOutput = require('changelog-maker/commit-to-output')
 const collectCommitLabels = require('changelog-maker/collect-commit-labels')
+const reverts        = require('changelog-maker/reverts')
 const groupCommits   = require('changelog-maker/group-commits')
-const isReleaseCommit = require('changelog-maker/groups').isReleaseCommit
+const groups         = require('changelog-maker/groups')
 const gitexec        = require('gitexec')
 
 const pkgFile        = path.join(process.cwd(), 'package.json')
@@ -106,6 +106,41 @@ function collect (repoPath, branch, startCommit, endRef) {
     .pipe(commitStream(ghId.user, ghId.name))
 }
 
+// copied and edited from changelog-maker
+function toStringMarkdown (data) {
+  let s = ''
+  s += '* [[`' + data.sha.substr(0, 10) + '`](' + data.shaUrl + ')] - '
+  s += (data.semver || []).length ? '**(' + data.semver.join(', ').toUpperCase() + ')** ' : ''
+  s += data.revert ? '***Revert*** "' : ''
+  s += data.group ? '**' + data.group + '**: ' : ''
+  s += data.summary.replace(/([_~*\\\[\]<>])/g, '\\$1')
+  s += data.revert ? '" ' : ' '
+  s += data.author ? `(${data.author}) ` : ''
+  s += data.pr ? `[${data.pr}](${data.prUrl})` : ''
+
+  return s
+}
+
+// copied and edited from changelog-maker
+function commitToOutput (commit, ghId) {
+  const data        = {}
+  const prUrlMatch  = commit.prUrl && commit.prUrl.match(/^https?:\/\/.+\/([^\/]+\/[^\/]+)\/\w+\/\d+$/i)
+  const urlHash     = '#'+commit.ghIssue || commit.prUrl
+  const ghUrl       = `${ghId.user}/${ghId.name}`
+
+  data.sha     = commit.sha
+  data.shaUrl  = `https://github.com/${ghUrl}/commit/${commit.sha.substr(0,10)}`
+  data.semver  = commit.labels && commit.labels.filter(function (l) { return l.indexOf('semver') > -1 }) || false
+  data.revert  = reverts.isRevert(commit.summary)
+  data.group   = groups.toGroups(commit.summary)
+  data.summary = groups.cleanSummary(reverts.cleanSummary(commit.summary))
+  data.author  = (commit.author && commit.author.name) || ''
+  data.pr      = prUrlMatch && ((prUrlMatch[1] != ghUrl ? prUrlMatch[1] : '') + urlHash)
+  data.prUrl   = prUrlMatch && commit.prUrl
+
+  return toStringMarkdown(data)
+}
+
 function getBranchDiff (branchOne, branchTwo, options = {
   reverse: false,
   group: false,
@@ -122,10 +157,10 @@ function getBranchDiff (branchOne, branchTwo, options = {
     if (err) throw err
 
     if (options.filterRelease) {
-      list = list.filter(commit => !isReleaseCommit(commit.summary))
+      list = list.filter(commit => !groups.isReleaseCommit(commit.summary))
     }
 
-    list = list.map(commit => commitToOutput(commit, false, ghId))
+    list = list.map(commit => commitToOutput(commit, ghId))
     if (options.reverse) list = list.reverse()
     callback(list.join('\n') + '\n')
   })
