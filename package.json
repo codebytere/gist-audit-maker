@@ -1,0 +1,23 @@
+{
+  "name": "gist-audit-maker",
+  "version": "0.0.1",
+  "description": "create and update audit lists for node backports",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codebytere/gist-audit-maker.git"
+  },
+  "author": "Shelley Vohr (@codebytere)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/codebytere/gist-audit-maker/issues"
+  },
+  "homepage": "https://github.com/codebytere/gist-audit-maker#readme",
+  "dependencies": {
+    "dotenv-safe": "^6.1.0",
+    "gists": "^2.0.0"
+  }
+}
