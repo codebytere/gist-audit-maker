@@ -29,7 +29,7 @@ const ghId = {
 
 
 function replace (s, m) {
-  Object.keys(m).forEach(function (k) {
+  Object.keys(m).forEach(k => {
     s = s.replace(new RegExp('\\{\\{' + k + '\\}\\}', 'g'), m[k])
   })
   return s
@@ -37,20 +37,18 @@ function replace (s, m) {
 
 
 function branchDiff (branch1, branch2, options, callback) {
-  if (!branch1 || !branch2)
+  if (!branch1 || !branch2) {
     return callback(new Error('Must supply two branch names to compare'))
+  }
 
   let repoPath = options.repoPath || process.cwd()
 
   findMergeBase(repoPath, branch1, branch2, (err, commit) => {
-    if (err)
-      return callback(err)
-    map(
-        [ branch1, branch2 ], (branch, callback) => {
-          collect(repoPath, branch, commit, branch == branch2 && options.endRef).pipe(listStream.obj(callback))
-        }
-      , (err, branchCommits) => err ? callback(err) : diffCollected(options, branchCommits, callback)
-    )
+    const collectFn = (err, branchCommits) => err ? callback(err) : diffCollected(options, branchCommits, callback)
+    if (err) return callback(err)
+    map([ branch1, branch2 ], (branch, callback) => {
+      collect(repoPath, branch, commit, branch == branch2 && options.endRef).pipe(listStream.obj(callback))
+    }, collectFn)
   })
 }
 
@@ -59,9 +57,7 @@ function findMergeBase (repoPath, branch1, branch2, callback) {
   let gitcmd = `git merge-base ${branch1} ${branch2}`
 
   gitexec.execCollect(repoPath, gitcmd, (err, data) => {
-    if (err)
-      return callback(err)
-
+    if (err) return callback(err)
     callback(null, data.substr(0, 10))
   })
 }
@@ -89,8 +85,7 @@ function diffCollected (options, branchCommits, callback) {
   let list = branchCommits[1].filter((commit) => !isInList(commit))
 
   collectCommitLabels(list, (err) => {
-    if (err)
-      return callback(err)
+    if (err) return callback(err)
 
     if (options.excludeLabels.length > 0) {
       list = list.filter((commit) => {
@@ -100,16 +95,9 @@ function diffCollected (options, branchCommits, callback) {
       })
     }
 
-    if (options.requireLabels.length > 0) {
-      list = list.filter((commit) => {
-        return commit.labels && commit.labels.some((label) => {
-          return options.requireLabels.indexOf(label) >= 0
-        })
-      })
-    }
-
-    if (options.group)
+    if (options.group) {
       list = groupCommits(list)
+    }
 
     callback(null, list)
   })
@@ -122,8 +110,8 @@ function printCommits (list, format, reverse) {
 
 function collect (repoPath, branch, startCommit, endRef) {
   let endrefcmd = endRef && replace(refcmd, { ref: endRef })
-    , untilcmd  = endRef ? replace(commitdatecmd, { refcmd: endrefcmd }) : ''
-    , _gitcmd      = replace(gitcmd, { branch, startCommit, untilcmd })
+  let untilcmd = endRef ? replace(commitdatecmd, { refcmd: endrefcmd }) : ''
+  let _gitcmd = replace(gitcmd, { branch, startCommit, untilcmd })
 
   return gitexec.exec(repoPath, _gitcmd)
     .pipe(split2())
@@ -135,28 +123,28 @@ function getBranchDiff (branchOne, branchTwo, options = {
   reverse: false,
   group: false,
   excludeLabels: [],
-  requireLabels: [],
   endRef,
   filterRelease: false,
   version: false
-}) {
+}, callback) {
   if (options.version)
     return console.log(`v ${require('./package.json').version}`)
 
   branchDiff(branchOne, branchTwo, options, (err, list) => {
     if (err) throw err
 
-    if (options.filterRelease)
+    if (options.filterRelease) {
       list = list.filter(commit => !isReleaseCommit(commit.summary))
+    }
 
     if (options.format === 'sha') {
       list = list.map(commit => `${commit.sha.substr(0, 10)}`)
     } else {
-      list = list.map(commit => commitToOutput(commit, simple, ghId))
+      list = list.map(commit => commitToOutput(commit, options.simple, ghId))
     }
   
     if (options.reverse) list = list.reverse()
-    return list.join('\n') + '\n'
+    callback(list.join('\n') + '\n')
   })
 }
 

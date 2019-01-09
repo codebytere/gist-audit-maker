@@ -50,12 +50,14 @@ async function gitAuditMaker (auditBranch) {
   const gistID = auditGist.id
 
   // get updated audit log data
-  const newAuditData = getNewAuditData(auditBranch)
-  console.log('newData is: ', newAuditData)
-  
-  // octokit.gists.update({gistID, files: {
-  //   content: newAuditData
-  // }})
+  const newAuditData = getNewAuditData(auditBranch, (data) => {
+    console.log('newData is: ', newAuditData)
+
+    // // update gist with new data
+    // octokit.gists.update({gistID, files: {
+    //   content: newAuditData
+    // }})
+  })
 }
 
 if (require.main === module) {
