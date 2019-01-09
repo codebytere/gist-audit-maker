@@ -21,8 +21,7 @@
   "homepage": "https://github.com/codebytere/gist-audit-maker#readme",
   "dependencies": {
     "@octokit/rest": "^16.7.0",
-    "chalk": "^2.4.2",
-    "changelog-maker": "^2.3.0",
+    "changelog-maker": "~2.2.0",
     "commit-stream": "^1.1.0",
     "dotenv-safe": "^6.1.0",
     "fs": "0.0.1-security",

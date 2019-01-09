@@ -8,7 +8,6 @@ const commitStream   = require('commit-stream')
 const split2         = require('split2')
 const listStream     = require('list-stream')
 const pkgtoId        = require('pkg-to-id')
-const chalk          = require('chalk')
 const map            = require('map-async')
 const commitToOutput = require('changelog-maker/commit-to-output')
 const collectCommitLabels = require('changelog-maker/collect-commit-labels')
@@ -27,14 +26,12 @@ const ghId = {
   name: pkgId.name || 'node'
 }
 
-
 function replace (s, m) {
   Object.keys(m).forEach(k => {
     s = s.replace(new RegExp('\\{\\{' + k + '\\}\\}', 'g'), m[k])
   })
   return s
 }
-
 
 function branchDiff (branch1, branch2, options, callback) {
   if (!branch1 || !branch2) {
@@ -52,7 +49,6 @@ function branchDiff (branch1, branch2, options, callback) {
   })
 }
 
-
 function findMergeBase (repoPath, branch1, branch2, callback) {
   let gitcmd = `git merge-base ${branch1} ${branch2}`
 
@@ -61,7 +57,6 @@ function findMergeBase (repoPath, branch1, branch2, callback) {
     callback(null, data.substr(0, 10))
   })
 }
-
 
 function diffCollected (options, branchCommits, callback) {
   function isInList (commit) {
@@ -73,8 +68,6 @@ function diffCollected (options, branchCommits, callback) {
             return commit.prUrl === c.prUrl
         } else if (commit.author.name === c.author.name
                 && commit.author.email === c.author.email) {
-          if (process.stderr.isTTY)
-            console.error(`Note: Commit fell back to author checking: "${commit.summary}" -`, commit.author)
           return true
         }
       }
@@ -103,11 +96,6 @@ function diffCollected (options, branchCommits, callback) {
   })
 }
 
-
-function printCommits (list, format, reverse) {
-}
-
-
 function collect (repoPath, branch, startCommit, endRef) {
   let endrefcmd = endRef && replace(refcmd, { ref: endRef })
   let untilcmd = endRef ? replace(commitdatecmd, { refcmd: endrefcmd }) : ''
@@ -119,7 +107,6 @@ function collect (repoPath, branch, startCommit, endRef) {
 }
 
 function getBranchDiff (branchOne, branchTwo, options = {
-  simple: false,
   reverse: false,
   group: false,
   excludeLabels: [],
@@ -127,8 +114,9 @@ function getBranchDiff (branchOne, branchTwo, options = {
   filterRelease: false,
   version: false
 }, callback) {
-  if (options.version)
+  if (options.version) {
     return console.log(`v ${require('./package.json').version}`)
+  }
 
   branchDiff(branchOne, branchTwo, options, (err, list) => {
     if (err) throw err
@@ -137,12 +125,7 @@ function getBranchDiff (branchOne, branchTwo, options = {
       list = list.filter(commit => !isReleaseCommit(commit.summary))
     }
 
-    if (options.format === 'sha') {
-      list = list.map(commit => `${commit.sha.substr(0, 10)}`)
-    } else {
-      list = list.map(commit => commitToOutput(commit, options.simple, ghId))
-    }
-  
+    list = list.map(commit => commitToOutput(commit, false, ghId))
     if (options.reverse) list = list.reverse()
     callback(list.join('\n') + '\n')
   })
