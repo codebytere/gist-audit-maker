@@ -117,20 +117,6 @@ function diffCollected (options, branchCommits, callback) {
 
 
 function printCommits (list, format, reverse) {
-  if (format === 'sha') {
-    list = list.map((commit) => `${commit.sha.substr(0, 10)}`)
-  } else {
-    list = list.map((commit) => commitToOutput(commit, format === 'simple', ghId))
-  }
-
-  if (reverse) list = list.reverse();
-
-  let out = list.join('\n') + '\n'
-
-  if (!process.stdout.isTTY)
-    out = chalk.stripColor(out)
-
-  process.stdout.write(out)
 }
 
 
@@ -161,9 +147,16 @@ function getBranchDiff (branchOne, branchTwo, options = {
     if (err) throw err
 
     if (options.filterRelease)
-      list = list.filter((commit) => !isReleaseCommit(commit.summary))
+      list = list.filter(commit => !isReleaseCommit(commit.summary))
 
-    printCommits(list, options.format, options.reverse)
+    if (options.format === 'sha') {
+      list = list.map(commit => `${commit.sha.substr(0, 10)}`)
+    } else {
+      list = list.map(commit => commitToOutput(commit, simple, ghId))
+    }
+  
+    if (options.reverse) list = list.reverse()
+    return list.join('\n') + '\n'
   })
 }
 

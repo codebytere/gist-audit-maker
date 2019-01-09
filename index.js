@@ -10,6 +10,12 @@ octokit.authenticate({
   password: process.env.PASSWORD
 })
 
+// mapping for branch diff version comparison
+const compareVersion ={
+  'v10.x': 'v11.x',
+  'v11.x': 'master'
+}
+
 // get audit data to update the gist
 function getNewAuditData(auditBranch) {
   const options = {
@@ -25,7 +31,7 @@ function getNewAuditData(auditBranch) {
   }
 
   const branchOne = `${auditBranch}-staging`
-  const branchTwo = `upstream/v11.x`
+  const branchTwo = `upstream/${compareVersion[auditBranch]}`
 
   return getBranchDiff(branchOne, branchTwo, options)
 }
@@ -38,19 +44,16 @@ async function gitAuditMaker (auditBranch) {
     .filter(gist => {
       const files = Object.keys(gist.files)
       return files.some(file => file === auditFileName)
-    })
+    })[0]
   
   // get the gist id for editing
-  const gist_id = auditGist.id
+  const gistID = auditGist.id
 
   // get updated audit log data
   const newAuditData = getNewAuditData(auditBranch)
-  console.log(newAuditData)
-
-  // const options = {}
-  // options.files[fileName].content = newAuditData
+  console.log('newData is: ', newAuditData)
   
-  // octokit.gists.update({gist_id, files: {
+  // octokit.gists.update({gistID, files: {
   //   content: newAuditData
   // }})
 }
