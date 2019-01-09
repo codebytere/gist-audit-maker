@@ -31,7 +31,7 @@ function getNewAuditData(auditBranch) {
 }
 
 async function gitAuditMaker (auditBranch) {
-  const auditFileName = `audit-${auditBranch}.md`
+  const auditFileName = `audit-${auditBranch.split('.')[0]}.md`
 
   // get the audit log gist to edit
   const auditGist = Object.values((await octokit.gists.list()).data)

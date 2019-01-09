@@ -154,16 +154,16 @@ function getBranchDiff (branchOne, branchTwo, options = {
   filterRelease: false,
   version: false
 }) {
-  if (version)
+  if (options.version)
     return console.log(`v ${require('./package.json').version}`)
 
-  branchDiff(branch1, branch2, options, (err, list) => {
+  branchDiff(branchOne, branchTwo, options, (err, list) => {
     if (err) throw err
 
-    if (filterRelease)
+    if (options.filterRelease)
       list = list.filter((commit) => !isReleaseCommit(commit.summary))
 
-    printCommits(list, format, reverse)
+    printCommits(list, options.format, options.reverse)
   })
 }
 
