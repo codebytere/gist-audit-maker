@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "gist-audit-maker": "./index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/codebytere/gist-audit-maker.git"
@@ -17,7 +20,17 @@
   },
   "homepage": "https://github.com/codebytere/gist-audit-maker#readme",
   "dependencies": {
+    "@octokit/rest": "^16.7.0",
+    "chalk": "^2.4.2",
+    "changelog-maker": "^2.3.0",
+    "commit-stream": "^1.1.0",
     "dotenv-safe": "^6.1.0",
-    "gists": "^2.0.0"
+    "fs": "0.0.1-security",
+    "gitexec": "^1.0.0",
+    "list-stream": "^1.0.1",
+    "map-async": "^0.1.1",
+    "path": "^0.12.7",
+    "pkg-to-id": "0.0.3",
+    "split2": "^3.1.0"
   }
 }

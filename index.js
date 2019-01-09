@@ -1,22 +1,19 @@
-const Gists = require('gists')
+#!/usr/bin/env node
+
+const octokit = require('@octokit/rest')()
 require('dotenv-safe').config();
 const { getBranchDiff } = require('./branch-diff-ish')
 
-const gists = new Gists({
+octokit.authenticate({
+  type: 'basic',
   username: process.env.USERNAME,
   password: process.env.PASSWORD
 })
 
-let auditBranch
-
-if (require.main === module) {
-  let argv = require('minimist')(process.argv.slice(2))
-  auditBranch = argv._[0]
-}
-
-// get audit data to update the 
-function getNewAuditData() {
+// get audit data to update the gist
+function getNewAuditData(auditBranch) {
   const options = {
+    filterRelease: true,
     excludeLabels: [ 
       'semver-major',
       'semver-minor',
@@ -33,26 +30,36 @@ function getNewAuditData() {
   return getBranchDiff(branchOne, branchTwo, options)
 }
 
-function gitAuditMaker (auditBranch) {
+async function gitAuditMaker (auditBranch) {
   const auditFileName = `audit-${auditBranch}.md`
 
   // get the audit log gist to edit
-  const auditGist = gists.list(username).data
+  const auditGist = Object.values((await octokit.gists.list()).data)
     .filter(gist => {
-      const files = Object.keys(gist.data.files)
+      const files = Object.keys(gist.files)
       return files.some(file => file === auditFileName)
-    })[0]
+    })
   
   // get the gist id for editing
-  const auditGistID = auditGist.id
+  const gist_id = auditGist.id
 
   // get updated audit log data
-  const newAuditData = getNewAuditData()
+  const newAuditData = getNewAuditData(auditBranch)
+  console.log(newAuditData)
 
-  const options = {}
-  options.files[fileName].content = newAuditData
+  // const options = {}
+  // options.files[fileName].content = newAuditData
   
-  gists.edit(auditGistID, options)
+  // octokit.gists.update({gist_id, files: {
+  //   content: newAuditData
+  // }})
+}
+
+if (require.main === module) {
+  let argv = require('minimist')(process.argv.slice(2))
+  const auditBranch = argv._[0]
+
+  gitAuditMaker(auditBranch)
 }
 
 module.exports = gitAuditMaker

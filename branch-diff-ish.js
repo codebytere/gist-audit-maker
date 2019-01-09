@@ -3,29 +3,29 @@
 'use strict'
 
 const fs             = require('fs')
-    , path           = require('path')
-    , commitStream   = require('commit-stream')
-    , split2         = require('split2')
-    , listStream     = require('list-stream')
-    , pkgtoId        = require('pkg-to-id')
-    , chalk          = require('chalk')
-    , map            = require('map-async')
-    , commitToOutput = require('changelog-maker/commit-to-output')
-    , collectCommitLabels = require('changelog-maker/collect-commit-labels')
-    , groupCommits   = require('changelog-maker/group-commits')
-    , isReleaseCommit = require('changelog-maker/groups').isReleaseCommit
-    , gitexec        = require('gitexec')
+const path           = require('path')
+const commitStream   = require('commit-stream')
+const split2         = require('split2')
+const listStream     = require('list-stream')
+const pkgtoId        = require('pkg-to-id')
+const chalk          = require('chalk')
+const map            = require('map-async')
+const commitToOutput = require('changelog-maker/commit-to-output')
+const collectCommitLabels = require('changelog-maker/collect-commit-labels')
+const groupCommits   = require('changelog-maker/group-commits')
+const isReleaseCommit = require('changelog-maker/groups').isReleaseCommit
+const gitexec        = require('gitexec')
 
-    , pkgFile        = path.join(process.cwd(), 'package.json')
-    , pkgData        = fs.existsSync(pkgFile) ? require(pkgFile) : {}
-    , pkgId          = pkgtoId(pkgData)
-    , refcmd         = 'git rev-list --max-count=1 {{ref}}'
-    , commitdatecmd  = '$(git show -s --format=%cd `{{refcmd}}`)'
-    , gitcmd         = 'git log {{startCommit}}..{{branch}} --until="{{untilcmd}}"'
-    , ghId           = {
-          user: pkgId.user || 'nodejs'
-        , name: pkgId.name || 'node'
-      }
+const pkgFile        = path.join(process.cwd(), 'package.json')
+const pkgData        = fs.existsSync(pkgFile) ? require(pkgFile) : {}
+const pkgId          = pkgtoId(pkgData)
+const refcmd         = 'git rev-list --max-count=1 {{ref}}'
+const commitdatecmd  = '$(git show -s --format=%cd `{{refcmd}}`)'
+const gitcmd         = 'git log {{startCommit}}..{{branch}} --until="{{untilcmd}}"'
+const ghId = {
+  user: pkgId.user || 'nodejs',
+  name: pkgId.name || 'node'
+}
 
 
 function replace (s, m) {
@@ -145,20 +145,22 @@ function collect (repoPath, branch, startCommit, endRef) {
 }
 
 function getBranchDiff (branchOne, branchTwo, options = {
-  simple,
-  reverse,
-  group,
-  excludeLabels = [],
-  requireLabels = [],
-  endRef
+  simple: false,
+  reverse: false,
+  group: false,
+  excludeLabels: [],
+  requireLabels: [],
+  endRef,
+  filterRelease: false,
+  version: false
 }) {
-  if (argv.version || argv.v)
+  if (version)
     return console.log(`v ${require('./package.json').version}`)
 
   branchDiff(branch1, branch2, options, (err, list) => {
     if (err) throw err
 
-    if (argv['filter-release'])
+    if (filterRelease)
       list = list.filter((commit) => !isReleaseCommit(commit.summary))
 
     printCommits(list, format, reverse)
