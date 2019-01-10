@@ -2,25 +2,25 @@
 
 'use strict'
 
-const fs             = require('fs')
-const path           = require('path')
-const commitStream   = require('commit-stream')
-const split2         = require('split2')
-const listStream     = require('list-stream')
-const pkgtoId        = require('pkg-to-id')
-const map            = require('map-async')
+const fs = require('fs')
+const path = require('path')
+const commitStream = require('commit-stream')
+const split2 = require('split2')
+const listStream = require('list-stream')
+const pkgtoId = require('pkg-to-id')
+const map = require('map-async')
 const collectCommitLabels = require('changelog-maker/collect-commit-labels')
-const reverts        = require('changelog-maker/reverts')
-const groupCommits   = require('changelog-maker/group-commits')
-const groups         = require('changelog-maker/groups')
-const gitexec        = require('gitexec')
+const reverts = require('changelog-maker/reverts')
+const groupCommits = require('changelog-maker/group-commits')
+const groups = require('changelog-maker/groups')
+const gitexec = require('gitexec')
 
-const pkgFile        = path.join(process.cwd(), 'package.json')
-const pkgData        = fs.existsSync(pkgFile) ? require(pkgFile) : {}
-const pkgId          = pkgtoId(pkgData)
-const refcmd         = 'git rev-list --max-count=1 {{ref}}'
-const commitdatecmd  = '$(git show -s --format=%cd `{{refcmd}}`)'
-const gitcmd         = 'git log {{startCommit}}..{{branch}} --until="{{untilcmd}}"'
+const pkgFile = path.join(process.cwd(), 'package.json')
+const pkgData = fs.existsSync(pkgFile) ? require(pkgFile) : {}
+const pkgId = pkgtoId(pkgData)
+const refcmd = 'git rev-list --max-count=1 {{ref}}'
+const commitdatecmd = '$(git show -s --format=%cd `{{refcmd}}`)'
+const gitcmd = 'git log {{startCommit}}..{{branch}} --until="{{untilcmd}}"'
 const ghId = {
   user: pkgId.user || 'nodejs',
   name: pkgId.name || 'node'
@@ -44,7 +44,7 @@ function branchDiff (branch1, branch2, options, callback) {
     const collectFn = (err, branchCommits) => err ? callback(err) : diffCollected(options, branchCommits, callback)
     if (err) return callback(err)
     map([ branch1, branch2 ], (branch, callback) => {
-      collect(repoPath, branch, commit, branch == branch2 && options.endRef).pipe(listStream.obj(callback))
+      collect(repoPath, branch, commit, branch === branch2 && options.endRef).pipe(listStream.obj(callback))
     }, collectFn)
   })
 }
@@ -123,20 +123,20 @@ function toStringMarkdown (data) {
 
 // copied and edited from changelog-maker
 function commitToOutput (commit, ghId) {
-  const data        = {}
-  const prUrlMatch  = commit.prUrl && commit.prUrl.match(/^https?:\/\/.+\/([^\/]+\/[^\/]+)\/\w+\/\d+$/i)
-  const urlHash     = '#'+commit.ghIssue || commit.prUrl
-  const ghUrl       = `${ghId.user}/${ghId.name}`
+  const data = {}
+  const prUrlMatch = commit.prUrl && commit.prUrl.match(/^https?:\/\/.+\/([^\/]+\/[^\/]+)\/\w+\/\d+$/i)
+  const urlHash = `#${commit.ghIssue}` || commit.prUrl
+  const ghUrl  = `${ghId.user}/${ghId.name}`
 
-  data.sha     = commit.sha
-  data.shaUrl  = `https://github.com/${ghUrl}/commit/${commit.sha.substr(0,10)}`
-  data.semver  = commit.labels && commit.labels.filter(function (l) { return l.indexOf('semver') > -1 }) || false
-  data.revert  = reverts.isRevert(commit.summary)
-  data.group   = groups.toGroups(commit.summary)
+  data.sha = commit.sha
+  data.shaUrl = `https://github.com/${ghUrl}/commit/${commit.sha.substr(0,10)}`
+  data.semver = commit.labels && commit.labels.filter(function (l) { return l.indexOf('semver') > -1 }) || false
+  data.revert = reverts.isRevert(commit.summary)
+  data.group = groups.toGroups(commit.summary)
   data.summary = groups.cleanSummary(reverts.cleanSummary(commit.summary))
-  data.author  = (commit.author && commit.author.name) || ''
-  data.pr      = prUrlMatch && ((prUrlMatch[1] != ghUrl ? prUrlMatch[1] : '') + urlHash)
-  data.prUrl   = prUrlMatch && commit.prUrl
+  data.author = (commit.author && commit.author.name) || ''
+  data.pr = prUrlMatch && ((prUrlMatch[1] !== ghUrl ? prUrlMatch[1] : '') + urlHash)
+  data.prUrl = prUrlMatch && commit.prUrl
 
   return toStringMarkdown(data)
 }
