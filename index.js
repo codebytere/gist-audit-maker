@@ -4,6 +4,10 @@ const octokit = require('@octokit/rest')()
 require('dotenv-safe').config();
 const { getBranchDiff } = require('./branch-diff-ish')
 
+require('colors')
+const pass = '\u2713'.green
+const fail = '\u2717'.red
+
 octokit.authenticate({
   type: 'basic',
   username: process.env.USERNAME,
@@ -46,21 +50,36 @@ async function gitAuditMaker (auditBranch) {
       return files.some(file => file === auditFileName)
     })[0]
 
-  if (!auditGist) {
-    console.log(`Failed to find the audit log gist at file: ${auditFileName}`)
-    return 1
-  }
-
   // get updated audit log data
   getNewAuditData(auditBranch, async auditData => {
-    const options = {
-      gist_id: auditGist.id,
-      files: {}
+    if (auditGist) {
+      const options = {
+        gist_id: auditGist.id,
+        files: {}
+      }
+      options.files[auditFileName] = { content: auditData }
+  
+      // update gist with new data
+      octokit.gists.update(options)
+      .then(gist => {
+        console.log(`${pass} See updated gist at: ${gist.data.html_url}`)
+      }).catch(err => {
+        console.log(`${fail} Failed to create new gist: `, err)
+        return 1
+      })
+    } else {
+      const options = { files: {} }
+      options.files[auditFileName] = { content: auditData }
+  
+      // create a new gist
+      octokit.gists.create(options)
+      .then(gist => {
+        console.log(`${pass} Created new gist at: ${gist.data.html_url}`)
+      }).catch(err => {
+        console.log(`${fail} Failed to create new gist: `, err)
+        return 1
+      })
     }
-    options.files[auditFileName] = { content: auditData }
-
-    // update gist with new data
-    await octokit.gists.update(options)
   })
 }
 
