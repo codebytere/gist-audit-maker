@@ -64,7 +64,7 @@ async function gitAuditMaker (auditBranch) {
       .then(gist => {
         console.log(`${pass} See updated gist at: ${gist.data.html_url}`)
       }).catch(err => {
-        console.log(`${fail} Failed to create new gist: `, err)
+        console.log(`${fail} Failed to update gist: `, err)
         return 1
       })
     } else {
