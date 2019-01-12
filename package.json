@@ -1,6 +1,6 @@
 {
   "name": "gist-audit-maker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "create and update audit lists for node backports",
   "main": "index.js",
   "scripts": {
