@@ -13,7 +13,7 @@ USERNAME=<your github username>
 PASSWORD=<your github password>
 ```
 
-This tool will look for a file named according to the following format: `audit-v[VERSION].md`, where version is a Node version such as `audit-v10.md` or `audit-v11.md`. If a gist with this name pattern doesn't exist, this toll will create it for you and then update it on future runs.
+This tool will look for a file named according to the following format: `audit-v[VERSION].md`, where version is a Node version such as `audit-v10.md` or `audit-v11.md`. If a gist with this name pattern doesn't exist, this tool will create it for you and then update it on future runs.
 
 Install `gist-audit-maker` globally:
 
