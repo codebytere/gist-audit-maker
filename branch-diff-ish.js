@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-
 'use strict'
+
+/* eslint-disable no-useless-escape */
 
 const fs = require('fs')
 const path = require('path')
@@ -61,13 +62,12 @@ function findMergeBase (repoPath, branch1, branch2, callback) {
 function diffCollected (options, branchCommits, callback) {
   function isInList (commit) {
     return branchCommits[0].some((c) => {
-      if (commit.sha === c.sha)
-        return true
+      if (commit.sha === c.sha) return true
       if (commit.summary === c.summary) {
         if (commit.prUrl && c.prUrl) {
-            return commit.prUrl === c.prUrl
-        } else if (commit.author.name === c.author.name
-                && commit.author.email === c.author.email) {
+          return commit.prUrl === c.prUrl
+        } else if (commit.author.name === c.author.name &&
+                   commit.author.email === c.author.email) {
           return true
         }
       }
@@ -126,11 +126,11 @@ function commitToOutput (commit, ghId) {
   const data = {}
   const prUrlMatch = commit.prUrl && commit.prUrl.match(/^https?:\/\/.+\/([^\/]+\/[^\/]+)\/\w+\/\d+$/i)
   const urlHash = `#${commit.ghIssue}` || commit.prUrl
-  const ghUrl  = `${ghId.user}/${ghId.name}`
+  const ghUrl = `${ghId.user}/${ghId.name}`
 
   data.sha = commit.sha
-  data.shaUrl = `https://github.com/${ghUrl}/commit/${commit.sha.substr(0,10)}`
-  data.semver = commit.labels && commit.labels.filter(function (l) { return l.indexOf('semver') > -1 }) || false
+  data.shaUrl = `https://github.com/${ghUrl}/commit/${commit.sha.substr(0, 10)}`
+  data.semver = (commit.labels && commit.labels.filter(l => l.indexOf('semver') > -1)) || false
   data.revert = reverts.isRevert(commit.summary)
   data.group = groups.toGroups(commit.summary)
   data.summary = groups.cleanSummary(reverts.cleanSummary(commit.summary))
@@ -145,7 +145,7 @@ function getBranchDiff (branchOne, branchTwo, options = {
   reverse: false,
   group: false,
   excludeLabels: [],
-  endRef,
+  endRef: '',
   filterRelease: false,
   version: false
 }, callback) {
@@ -162,7 +162,7 @@ function getBranchDiff (branchOne, branchTwo, options = {
 
     list = list.map(commit => commitToOutput(commit, ghId))
     if (options.reverse) list = list.reverse()
-    callback(list.join('\n') + '\n')
+    callback(null, list.join('\n') + '\n')
   })
 }
 

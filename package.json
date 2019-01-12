@@ -4,7 +4,7 @@
   "description": "create and update audit lists for node backports",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "standard ."
   },
   "bin": {
     "gist-audit-maker": "./index.js"
