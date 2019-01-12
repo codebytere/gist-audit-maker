@@ -13,9 +13,7 @@ USERNAME=<your github username>
 PASSWORD=<your github password>
 ```
 
-You will also need to have an existing gist with the name of the target branch for auditing. This gist will need to be named according to the following format: `audit-v[VERSION].md`, where version is a Node version such as `audit-v10.md` or `audit-v11.md`.
-
-Note: Future versions will create this gist if it doesn't already exist.
+This tool will look for a file named according to the following format: `audit-v[VERSION].md`, where version is a Node version such as `audit-v10.md` or `audit-v11.md`. If a gist with this name pattern doesn't exist, this toll will create it for you and then update it on future runs.
 
 Install `gist-audit-maker` globally:
 
@@ -23,11 +21,11 @@ Install `gist-audit-maker` globally:
 $ npm i -g gist-audit-maker
 ```
 
-This tool takes one argument: the the target branch for auditing.
+This tool must be run from your local clone of the core `nodejs/node` repository. It takes one argument: the the target branch for auditing.
 
-Examples:
+Example:
 
 ```sh
-$ gist-audit-maker -- v10.x 
-$ gist-audit-maker -- v11.x 
+$ cd /path/to/node
+$ gist-audit-maker -- v10.x
 ```
