@@ -23,7 +23,6 @@
     "@octokit/rest": "^16.7.0",
     "changelog-maker": "~2.2.0",
     "commit-stream": "^1.1.0",
-    "dotenv-safe": "^6.1.0",
     "fs": "0.0.1-security",
     "gitexec": "^1.0.0",
     "list-stream": "^1.0.1",

@@ -3,7 +3,6 @@
 'use strict'
 
 const octokit = require('@octokit/rest')()
-require('dotenv-safe').config()
 const { getBranchDiff } = require('./branch-diff-ish')
 
 require('colors')
