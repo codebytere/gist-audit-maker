@@ -3,6 +3,7 @@
 'use strict'
 
 const octokit = require('@octokit/rest')()
+const yargs = require('yargs')
 const { getBranchDiff } = require('./branch-diff-ish')
 
 require('colors')
@@ -100,9 +101,9 @@ async function gistAuditMaker () {
 
 // initialize fro command line
 if (require.main === module) {
-  let argv = require('minimist')(process.argv.slice(2))
-  auditBranch = argv._[0]
-  semverTarget = argv._[1]
+  let args = yargs.argv
+  auditBranch = args.branch
+  semverTarget = args.semver
 
   if (!Object.keys(compareVersion).includes(auditBranch)) {
     throw new Error('Invalid branch: must be [v9.x | v10.x | v11.x]')
