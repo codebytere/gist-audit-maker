@@ -35,13 +35,14 @@ function getNewAuditData (callback) {
       `backport-requested-${auditBranch}`,
       `backported-to-${auditBranch}`,
       'baking-for-lts'
-    ]
+    ],
+    requireLabels: []
   }
 
   if (semverTarget === 'patch') {
     options.excludeLabels.push('semver-minor')
   } else if (semverTarget === 'minor') {
-    options.requireLabels = ['semver-minor']
+    options.requireLabels.push('semver-minor')
   } else {
     throw new Error('Invalid semver target type: must be [minor | patch].')
   }
@@ -53,7 +54,7 @@ function getNewAuditData (callback) {
 }
 
 async function gistAuditMaker () {
-  const auditFileName = `audit-${auditBranch.split('.')[0]}.md`
+  const auditFileName = `audit-${auditBranch.split('.')[0]}-${semverTarget}.md`
 
   // get the audit log gist to edit
   const auditGist = Object.values((await octokit.gists.list()).data)
@@ -63,7 +64,9 @@ async function gistAuditMaker () {
     })[0]
 
   // get updated audit log data
-  getNewAuditData(async auditData => {
+  getNewAuditData(async (err, auditData) => {
+    if (err) throw err
+
     if (auditGist) {
       const options = {
         gist_id: auditGist.id,
@@ -95,7 +98,7 @@ async function gistAuditMaker () {
   })
 }
 
-// initialize from command line
+// initialize fro command line
 if (require.main === module) {
   let argv = require('minimist')(process.argv.slice(2))
   auditBranch = argv._[0]

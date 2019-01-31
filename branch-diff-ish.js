@@ -170,6 +170,7 @@ function getBranchDiff (branchOne, branchTwo, options = {
 
     list = list.map(commit => commitToOutput(commit, ghId))
     if (options.reverse) list = list.reverse()
+
     callback(null, list.join('\n') + '\n')
   })
 }
