@@ -69,11 +69,15 @@ async function gistAuditMaker () {
     if (err) throw err
 
     if (auditGist) {
+      const numCommits = auditData.split('\n').length - 1
       const options = {
         gist_id: auditGist.id,
+        description: `Backlog is ${numCommits} commits.`,
         files: {}
       }
-      options.files[auditFileName] = { content: auditData }
+      options.files[auditFileName] = { 
+        content: auditData 
+      }
 
       // update gist with new data
       octokit.gists.update(options)
