@@ -81,9 +81,17 @@ function diffCollected (options, branchCommits, callback) {
     if (err) return callback(err)
 
     if (options.excludeLabels.length > 0) {
-      list = list.filter((commit) => {
-        return !commit.labels || !commit.labels.some((label) => {
+      list = list.filter(commit => {
+        return !commit.labels || !commit.labels.some(label => {
           return options.excludeLabels.indexOf(label) >= 0
+        })
+      })
+    }
+
+    if (options.requireLabels.length > 0) {
+      list = list.filter(commit => {
+        return commit.labels && commit.labels.some(label => {
+          return options.requireLabels.indexOf(label) >= 0
         })
       })
     }

@@ -10,6 +10,9 @@ require('colors')
 const pass = '\u2713'.green
 const fail = '\u2717'.red
 
+let auditBranch
+let semverTarget
+
 octokit.authenticate({
   type: 'basic',
   username: process.env.USERNAME,
@@ -18,22 +21,30 @@ octokit.authenticate({
 
 // mapping for branch diff version comparison
 const compareVersion = {
+  'v9.x': 'v10.x',
   'v10.x': 'v11.x',
   'v11.x': 'master'
 }
 
 // get audit data to update the gist
-function getNewAuditData (auditBranch, callback) {
+function getNewAuditData (callback) {
   const options = {
     filterRelease: true,
     excludeLabels: [
       'semver-major',
-      'semver-minor',
       `dont-land-on-${auditBranch}`,
       `backport-requested-${auditBranch}`,
       `backported-to-${auditBranch}`,
       'baking-for-lts'
     ]
+  }
+
+  if (semverTarget === 'patch') {
+    options.excludeLabels.push('semver-minor')
+  } else if (semverTarget === 'minor') {
+    options.requireLabels = ['semver-minor']
+  } else {
+    throw new Error('Invalid semver target type: must be [minor | patch].')
   }
 
   const branchOne = `${auditBranch}-staging`
@@ -42,7 +53,7 @@ function getNewAuditData (auditBranch, callback) {
   return getBranchDiff(branchOne, branchTwo, options, callback)
 }
 
-async function gistAuditMaker (auditBranch) {
+async function gistAuditMaker () {
   const auditFileName = `audit-${auditBranch.split('.')[0]}.md`
 
   // get the audit log gist to edit
@@ -53,7 +64,7 @@ async function gistAuditMaker (auditBranch) {
     })[0]
 
   // get updated audit log data
-  getNewAuditData(auditBranch, async auditData => {
+  getNewAuditData(async auditData => {
     if (auditGist) {
       const options = {
         gist_id: auditGist.id,
@@ -88,9 +99,14 @@ async function gistAuditMaker (auditBranch) {
 // initialize from command line
 if (require.main === module) {
   let argv = require('minimist')(process.argv.slice(2))
-  const auditBranch = argv._[0]
+  auditBranch = argv._[0]
+  semverTarget = argv._[1]
 
-  gistAuditMaker(auditBranch)
+  if (!Object.keys(compareVersion).includes(auditBranch)) {
+    throw new Error('Invalid branch: must be [v9.x | v10.x | v11.x]')
+  }
+
+  gistAuditMaker()
 }
 
 module.exports = gistAuditMaker
