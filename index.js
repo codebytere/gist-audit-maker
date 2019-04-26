@@ -51,7 +51,7 @@ function getNewAuditData (callback) {
   }
 
   const branchOne = `${auditBranch}-staging`
-  const branchTwo = isFork ? `upstream/${compareVersion[auditBranch]}` : compareVersion[auditBranch]
+  const branchTwo = isFork ? `upstream/${compareVersion[auditBranch]}` : `origin/${compareVersion[auditBranch]}`
 
   return getBranchDiff(branchOne, branchTwo, options, callback)
 }
