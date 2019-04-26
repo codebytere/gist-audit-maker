@@ -12,6 +12,7 @@ const fail = '\u2717'.red
 
 let auditBranch
 let semverTarget
+let isFork
 
 octokit.authenticate({
   type: 'basic',
@@ -50,7 +51,7 @@ function getNewAuditData (callback) {
   }
 
   const branchOne = `${auditBranch}-staging`
-  const branchTwo = `upstream/${compareVersion[auditBranch]}`
+  const branchTwo = isFork ? `upstream/${compareVersion[auditBranch]}` : compareVersion[auditBranch]
 
   return getBranchDiff(branchOne, branchTwo, options, callback)
 }
@@ -104,11 +105,12 @@ async function gistAuditMaker () {
   })
 }
 
-// initialize fro command line
+// initialize from command line
 if (require.main === module) {
   let args = yargs.argv
   auditBranch = args.branch
   semverTarget = args.semver
+  isFork = args.fork === 'true'
 
   if (!Object.keys(compareVersion).includes(auditBranch)) {
     throw new Error('Invalid branch: must be [v9.x | v10.x | v11.x]')
