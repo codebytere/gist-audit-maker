@@ -23,7 +23,8 @@ octokit.authenticate({
 const compareVersion = {
   'v9.x': 'v10.x',
   'v10.x': 'v11.x',
-  'v11.x': 'master'
+  'v11.x': 'v12.x',
+  'v12.x': 'master'
 }
 
 // get audit data to update the gist
