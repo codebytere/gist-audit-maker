@@ -21,13 +21,17 @@ Install `gist-audit-maker` globally:
 $ npm i -g gist-audit-maker
 ```
 
-This tool must be run from your local clone of the core `nodejs/node` repository. It takes two arguments: `branch`, the the target branch for auditing, and `semver`, for whether you would like to see either `semver-minor` or `semver-patch` commits. Possible values for `semver` are `minor` or `patch`.
+This tool must be run from your local clone of the core `nodejs/node` repository. It takes three arguments:
+
+1. `branch` - the target branch for auditing
+2. `semver` - whether you would like to see either `semver-minor` or `semver-patch` commits (possible values are `minor` or `patch`)
+3. `fork` - whether or not the repo in which this is being run is a fork (defaults to `false`)
 
 Examples:
 
 ```sh
 $ cd /path/to/node
-$ gist-audit-maker --branch=v10.x --semver=patch
+$ gist-audit-maker --branch=v10.x --semver=patch --fork=true
 ```
 
 ```sh
@@ -39,5 +43,5 @@ You could also run it with `npx`, like so:
 
 ```sh
 $ cd /path/to/node
-$ npx gist-audit-maker --branch=v10.x --semver=minor
+$ npx gist-audit-maker --branch=v10.x --semver=minor --fork=false
 ```
